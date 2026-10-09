@@ -19,12 +19,10 @@ lo que el codigo efectivamente hace.
 
 - La clave del Bug (ej: `DEMO-5042`) y/o de la Historia de Usuario relacionada
   (si no las tenes, el paso 1 explica como conseguirlas igual).
-- La ruta local del repo (`repoPath`) donde esta el codigo de esa historia, y
-  las referencias de git a comparar (`fromRef` = rama base, `toRef` = rama o
-  commit de la historia).
-
-Si el usuario no te dio la ruta del repo o las referencias de git, pedilas
-antes de seguir — eso no tiene fallback.
+- De donde sacar el codigo desarrollado: un repo local (`repoPath` + `fromRef`
+  / `toRef`) o un Merge Request de GitLab (`project` + `mrIid`). Si el usuario
+  no aclaro cual de los dos, pedirselo antes de seguir — eso no tiene
+  fallback automatico.
 
 ## Fuente de datos de Jira y documentacion: orden de prioridad
 
@@ -62,10 +60,18 @@ casos de prueba, segui siempre este orden:
    gestion de casos de prueba, si el equipo tiene uno → `demo_jira_get_test_cases`
    → pedirselos al usuario).
 
-4. **Traer el codigo desarrollado.** Llamar `git_get_changed_files` y luego
-   `git_get_diff` con el `repoPath`, `fromRef` y `toRef` indicados por el
-   usuario. Si el diff es muy grande o hace falta ver un archivo completo, usar
-   `git_get_file_content`.
+4. **Traer el codigo desarrollado**, segun de donde venga:
+   - **Repo local**: llamar `git_get_changed_files` y luego `git_get_diff` con
+     el `repoPath`, `fromRef` y `toRef` indicados por el usuario. Si el diff
+     es muy grande o hace falta ver un archivo completo, usar
+     `git_get_file_content`.
+   - **Merge Request de GitLab**: si hay un MCP de GitLab real conectado en
+     la sesion (por ejemplo `fedpat-gitlab`), preferir sus tools (equivalentes
+     a traer info y diff de un MR) para obtener datos reales. Solo si no hay
+     ningun MCP de GitLab conectado, usar `gitlab_get_mr_info` y
+     `gitlab_get_mr_diff` de este servidor (requieren `GITLAB_BASE_URL` y
+     `GITLAB_TOKEN` configurados; si no lo estan, la tool lo indica — en ese
+     caso pedirle al usuario que clone el repo o pegue el diff).
 
 5. **Comparar y razonar**, en este orden:
    - ¿Que dice la documentacion que deberia pasar?

@@ -23,12 +23,11 @@ antes de cerrar la tarea.
 ## Datos que vas a necesitar
 
 - La clave de la Historia de Usuario.
-- Si la Historia tiene codigo de **backend**: la ruta local del repo
-  (`repoPath`) y las referencias de git a comparar (`fromRef` = rama base,
-  `toRef` = rama de la historia).
-- Si la Historia es de **frontend**, o mixta: igual, pero el codigo de
-  frontend no se va a analizar en este MVP (ver "Backend vs frontend"
-  abajo) — no hace falta `repoPath`/refs de frontend para este skill.
+- Si la Historia tiene codigo de **backend**: de donde sacarlo — un repo local
+  (`repoPath` + `fromRef`/`toRef`) o un Merge Request de GitLab (`project` +
+  `mrIid`).
+- Si la Historia es de **frontend**, o mixta: no hace falta ubicacion de
+  codigo de frontend para este skill (ver "Backend vs frontend" abajo).
 
 Si no es obvio si la Historia es de backend o de frontend (o ambas), pedirlo
 directamente al usuario antes de seguir. No asumirlo.
@@ -69,9 +68,13 @@ documentacion, de la HU ni de casos de prueba.
    prueba cargados, no es un error: decirlo y seguir igual con el resto del
    chequeo.
 
-4. **Si la Historia es (o incluye) backend**: traer el diff de codigo
-   (`git_get_changed_files`, `git_get_diff`, y `git_get_file_content` si hace
-   falta ver un archivo completo) entre `fromRef` y `toRef`.
+4. **Si la Historia es (o incluye) backend**: traer el diff de codigo.
+   - **Repo local**: `git_get_changed_files`, `git_get_diff`, y
+     `git_get_file_content` si hace falta ver un archivo completo, entre
+     `fromRef` y `toRef`.
+   - **Merge Request de GitLab**: preferir un MCP de GitLab real conectado en
+     la sesion (ej. `fedpat-gitlab`) si existe. Solo si no hay ninguno, usar
+     `gitlab_get_mr_info` y `gitlab_get_mr_diff` de este servidor.
 
 5. **Evaluar cada criterio de aceptacion por separado**, con uno de estos tres
    estados:

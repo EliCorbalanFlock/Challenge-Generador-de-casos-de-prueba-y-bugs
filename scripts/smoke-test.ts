@@ -55,4 +55,8 @@ await call("git_get_diff", {
   toRef: "feature/DEMO-6010-denuncia-srt",
 });
 
+// Sin GITLAB_BASE_URL/GITLAB_TOKEN configurados: debe devolver un error
+// entendible, no explotar.
+await call("gitlab_get_mr_diff", { project: "grupo/proyecto-demo", mrIid: 123 });
+
 await client.close();

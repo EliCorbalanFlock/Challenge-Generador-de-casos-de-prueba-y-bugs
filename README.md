@@ -45,10 +45,11 @@ validacion visual contra el diseño requiere revision manual.
   real de Jira — son solo para poder probar el flujo sin credenciales. No es
   el camino recomendado para uso real: ver la seccion "Jira: no reinventar la
   rueda" mas abajo.
-- **Codigo**: se analiza un repo git **local** (parametro `repoPath`), via
-  `git diff` entre dos referencias (rama base vs rama/commit de la historia).
-  No depende de GitLab ni de ningun token. Esta es la parte que todo equipo
-  necesita y que normalmente no tiene ya resuelta via otro MCP.
+- **Codigo**: dos formas de traerlo. Un repo git **local** (parametro
+  `repoPath`), via `git diff` entre dos referencias — no depende de GitLab ni
+  de ningun token. O, sin clonar nada, un **Merge Request de GitLab** via API
+  REST (`gitlab_get_mr_info` / `gitlab_get_mr_diff`, requieren
+  `GITLAB_BASE_URL` y `GITLAB_TOKEN`) — ver "GitLab: no reinventar la rueda".
 - Se incluye `sample-repo/`, un repo git de juguete con dos escenarios (ver
   "Demo" abajo), para poder probar el flujo sin tocar ningun repo ni dato de
   ningun cliente.
@@ -67,6 +68,19 @@ directamente al usuario que pegue el texto de la Historia de Usuario y del
 bug reportado. Ver el detalle en
 `.claude/skills/analizar-historia-bug/SKILL.md`.
 
+## GitLab: no reinventar la rueda
+
+Mismo criterio que con Jira. Si el equipo ya tiene un MCP de GitLab propio
+conectado (en FedPat, `fedpat-gitlab`), los skills le indican al agente que
+lo use a ese para traer info y diff de un Merge Request — son datos reales, y
+evita duplicar un cliente que ya existe. Las tools `gitlab_get_mr_info` /
+`gitlab_get_mr_diff` de este servidor son para el caso en que el equipo **no**
+tiene un MCP de GitLab propio pero tampoco quiere clonar el repo localmente:
+pegan directo contra la API REST de GitLab usando `GITLAB_BASE_URL` y
+`GITLAB_TOKEN` (variables de entorno). Si ninguna de las dos esta disponible
+(ni MCP de GitLab ni estas variables), lo que queda es clonar el repo y usar
+las tools `git_*` sobre un `repoPath` local.
+
 ## Tools expuestas
 
 | Tool | Que hace |
@@ -77,6 +91,8 @@ bug reportado. Ver el detalle en
 | `git_get_changed_files` | Lista los archivos modificados entre dos referencias de un repo git local. |
 | `git_get_diff` | Trae el diff completo entre dos referencias de un repo git local. |
 | `git_get_file_content` | Trae el contenido completo de un archivo en una referencia puntual. |
+| `gitlab_get_mr_info` | Trae metadatos de un Merge Request (titulo, descripcion, estado, ramas) via API REST de GitLab, sin clonar. Requiere `GITLAB_BASE_URL`/`GITLAB_TOKEN`. |
+| `gitlab_get_mr_diff` | Trae el diff completo de un Merge Request via API REST de GitLab, sin clonar. Requiere `GITLAB_BASE_URL`/`GITLAB_TOKEN`. |
 
 ## Instalacion
 
@@ -90,6 +106,14 @@ npm run setup:sample-repo   # genera sample-repo/ (no se versiona, ver mas abajo
 que no se comitea dentro de este repo: se genera localmente a partir de
 `scripts/setup-sample-repo.sh`. Volver a correr ese script en cualquier
 momento lo regenera desde cero.
+
+Para usar `gitlab_get_mr_info` / `gitlab_get_mr_diff` (opcional, solo si no
+hay un MCP de GitLab propio conectado), configurar:
+
+```bash
+export GITLAB_BASE_URL="https://gitlab.com"   # o la URL del GitLab self-hosted del equipo
+export GITLAB_TOKEN="<personal access token con scope read_api>"
+```
 
 ## Uso desde Claude Code
 
@@ -190,12 +214,12 @@ npm run smoke
 
 ## Proximos pasos (fuera del alcance de hoy)
 
-- Probar el skill con un MCP de Jira real conectado en paralelo (ver "Jira:
-  no reinventar la rueda") y ajustar las instrucciones si el agente no elige
-  bien entre la tool real y las `demo_jira_*`.
-- Tool opcional para traer el diff de un Merge Request via API de GitLab,
-  como alternativa a un repo local, para equipos que no quieran clonar el
-  repo localmente.
+- Probar los skills con un MCP de Jira y/o de GitLab real conectado en
+  paralelo (ver las secciones "no reinventar la rueda") y ajustar las
+  instrucciones si el agente no elige bien entre la tool real y las de este
+  servidor.
+- Capacidad de comparar frontend contra un diseño de Figma (hoy
+  explicitamente fuera de alcance en `revision-pre-qa`).
 - Si algun equipo no tiene ningun MCP de Jira propio, recien ahi evaluar
   agregar un cliente real a `src/data/jiraStore.ts` (`JIRA_BASE_URL`,
   `JIRA_EMAIL`, `JIRA_API_TOKEN` por variables de entorno) manteniendo la

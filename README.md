@@ -58,10 +58,12 @@ validacion visual contra el diseño requiere revision manual.
 ## Estado actual (PoC para la jornada de IA)
 
 - **Jira**: las tools `demo_jira_*` de este servidor leen fixtures locales
-  (`issues.json`, `testCases.json`, `docs.json` en `fixtures/`), no la API
-  real de Jira — son solo para poder probar el flujo sin credenciales. No es
-  el camino recomendado para uso real: ver la seccion "Jira: no reinventar la
-  rueda" mas abajo.
+  (`issues.json`, `testCases.json`, `docs.json` en `fixtures/`) por defecto.
+  Si el servidor tiene `JIRA_BASE_URL`/`JIRA_EMAIL`/`JIRA_API_TOKEN`
+  configurados, intentan primero la API real de Jira (y Confluence Cloud del
+  mismo sitio, para documentacion) y caen a fixtures si no encuentran el
+  dato — pensado solo para equipos sin ningun MCP de Jira propio: ver la
+  seccion "Jira: no reinventar la rueda" mas abajo.
 - **Codigo**: dos formas de traerlo. Un repo git **local** (parametro
   `repoPath`), via `git diff` entre dos referencias — no depende de GitLab ni
   de ningun token. O, sin clonar nada, un **Merge Request de GitLab** via API
@@ -74,16 +76,25 @@ validacion visual contra el diseño requiere revision manual.
 ## Jira: no reinventar la rueda
 
 La mayoria de los equipos que podrian usar este MCP ya tienen conectado un
-MCP de Jira propio (en FedPat, `fedpat-jira`; en otro equipo, el que sea).
-Por eso este servidor no implementa un cliente real de la API de Jira: el
-skill `analizar-historia-bug` le indica al agente que, si hay un MCP de Jira
-(o de documentacion tecnica, o de gestion de casos de prueba) conectado en la
-sesion, lo use a ese para traer los datos reales — y que recurra a las tools
-`demo_jira_*` de este servidor solo como fallback para probar el flujo sin
-esa conexion. Si ninguna de las dos fuentes tiene el dato, el skill le pide
-directamente al usuario que pegue el texto de la Historia de Usuario y del
-bug reportado. Ver el detalle en
+MCP de Jira propio (en FedPat, `fedpat-jira`; en otro equipo, el que sea). Los
+skills le indican al agente que, si hay un MCP de Jira (o de documentacion
+tecnica, o de gestion de casos de prueba) conectado en la sesion, lo use a ese
+para traer los datos reales antes que nada — y que recurra a las tools
+`demo_jira_*` de este servidor solo si no hay ninguno. Si ninguna de las dos
+fuentes tiene el dato, el skill le pide directamente al usuario que pegue el
+texto de la Historia de Usuario y del bug reportado. Ver el detalle en
 `.claude/skills/analizar-historia-bug/SKILL.md`.
+
+Para el equipo que **no** tiene ningun MCP de Jira propio, las tools
+`demo_jira_*` pueden traer datos reales igual, sin necesidad de un MCP
+adicional: configurando `JIRA_BASE_URL`, `JIRA_EMAIL` y `JIRA_API_TOKEN`
+(variables de entorno, con un API token de Atlassian), `src/data/jiraStore.ts`
+usa `src/data/jiraRealClient.ts` para traer el issue, la documentacion
+(resuelve URLs de Confluence Cloud del mismo sitio) y los casos de prueba
+(issues enlazados del tipo configurado en `JIRA_TEST_ISSUE_TYPE`, por defecto
+`"Test"` — heuristica generica, sin integracion con Xray/Zephyr) antes de caer
+a las fixtures. Si no se configuran esas variables, el comportamiento es
+exactamente el de antes (fixtures de demo).
 
 ## GitLab: no reinventar la rueda
 
@@ -102,9 +113,9 @@ las tools `git_*` sobre un `repoPath` local.
 
 | Tool | Que hace |
 |---|---|
-| `demo_jira_get_issue` | [Demo] Trae un issue (HU o Bug) desde fixtures: resumen, descripcion, estado, issues enlazados, links a documentacion. Usar solo si no hay un MCP de Jira real conectado. |
-| `demo_jira_get_test_cases` | [Demo] Trae, desde fixtures, los casos de prueba asociados a una Historia de Usuario. |
-| `demo_jira_get_documentation` | [Demo] Trae, desde fixtures, el contenido de una documentacion tecnica enlazada a un issue. |
+| `demo_jira_get_issue` | Trae un issue (HU o Bug): resumen, descripcion, estado, issues enlazados, links a documentacion. Real si hay `JIRA_*` configurado y el issue existe; si no, fixtures. Usar solo si no hay un MCP de Jira real conectado. |
+| `demo_jira_get_test_cases` | Trae los casos de prueba asociados a una Historia de Usuario. Real (heuristica por tipo de issue enlazado) o fixtures, igual criterio que arriba. |
+| `demo_jira_get_documentation` | Trae el contenido de una documentacion tecnica enlazada a un issue. Real (Confluence Cloud) o fixtures, igual criterio que arriba. |
 | `git_get_changed_files` | Lista los archivos modificados entre dos referencias de un repo git local. |
 | `git_get_diff` | Trae el diff completo entre dos referencias de un repo git local. |
 | `git_get_file_content` | Trae el contenido completo de un archivo en una referencia puntual. |
@@ -131,6 +142,20 @@ hay un MCP de GitLab propio conectado), configurar:
 export GITLAB_BASE_URL="https://gitlab.com"   # o la URL del GitLab self-hosted del equipo
 export GITLAB_TOKEN="<personal access token con scope read_api>"
 ```
+
+Para que las tools `demo_jira_*` traigan datos reales (opcional, solo si no
+hay un MCP de Jira propio conectado), configurar:
+
+```bash
+export JIRA_BASE_URL="https://tuorg.atlassian.net"
+export JIRA_EMAIL="vos@tuorg.com"
+export JIRA_API_TOKEN="<API token de Atlassian>"
+export JIRA_TEST_ISSUE_TYPE="Test"   # opcional, tipo de issue que se trata como caso de prueba
+```
+
+Sin estas variables, el comportamiento sigue siendo el de las fixtures de
+demo — no hace falta configurar nada para probar los tres escenarios de la
+seccion "Demo".
 
 ## Uso desde Claude Code
 
@@ -237,7 +262,7 @@ npm run smoke
   servidor.
 - Capacidad de comparar frontend contra un diseño de Figma (hoy
   explicitamente fuera de alcance en `revision-pre-qa`).
-- Si algun equipo no tiene ningun MCP de Jira propio, recien ahi evaluar
-  agregar un cliente real a `src/data/jiraStore.ts` (`JIRA_BASE_URL`,
-  `JIRA_EMAIL`, `JIRA_API_TOKEN` por variables de entorno) manteniendo la
-  misma firma de funciones — no es el camino por defecto.
+- El cliente real de Jira (`jiraRealClient.ts`) resuelve casos de prueba por
+  una heuristica generica (tipo de issue enlazado); un equipo con Xray o
+  Zephyr se beneficiaria de una integracion especifica con esa API en vez de
+  esta heuristica.

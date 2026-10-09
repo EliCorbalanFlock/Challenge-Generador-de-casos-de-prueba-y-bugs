@@ -1,0 +1,6 @@
+{
+  "DOC-FILTROS-AVISO": {
+    "title": "Filtros del listado de Avisos de Obra",
+    "content": "El listado de avisos de obra soporta un filtro por estado. Los estados validos del dominio son exactamente cuatro: Pendiente, Aprobado, Rechazado y Anulado (ver enum EstadoAviso en el core aviso-de-obra). El filtro debe comparar el estado persistido contra el valor elegido por el usuario, ambos representados con el mismo enum. No existe en el dominio un estado 'Cancelado': ese valor no debe aparecer en ningun filtro ni caso de prueba."
+  }
+}

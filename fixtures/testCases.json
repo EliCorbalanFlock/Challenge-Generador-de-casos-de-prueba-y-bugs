@@ -1,0 +1,37 @@
+{
+  "DEMO-5001": [
+    {
+      "key": "DEMO-5001-TC1",
+      "title": "Filtrar avisos por estado Pendiente",
+      "preconditions": "Existen avisos en estado Pendiente, Aprobado y Rechazado.",
+      "steps": [
+        "Ingresar al listado de avisos de obra",
+        "Seleccionar el filtro de estado 'Pendiente'",
+        "Confirmar el filtro"
+      ],
+      "expectedResult": "El listado muestra unicamente los avisos en estado Pendiente."
+    },
+    {
+      "key": "DEMO-5001-TC2",
+      "title": "Filtrar avisos por estado Aprobado",
+      "preconditions": "Existen avisos en estado Pendiente, Aprobado y Rechazado.",
+      "steps": [
+        "Ingresar al listado de avisos de obra",
+        "Seleccionar el filtro de estado 'Aprobado'",
+        "Confirmar el filtro"
+      ],
+      "expectedResult": "El listado muestra unicamente los avisos en estado Aprobado."
+    },
+    {
+      "key": "DEMO-5001-TC3",
+      "title": "Filtrar avisos por estado Cancelado",
+      "preconditions": "Existen avisos en distintos estados.",
+      "steps": [
+        "Ingresar al listado de avisos de obra",
+        "Seleccionar el filtro de estado 'Cancelado'",
+        "Confirmar el filtro"
+      ],
+      "expectedResult": "El listado muestra unicamente los avisos en estado Cancelado."
+    }
+  ]
+}

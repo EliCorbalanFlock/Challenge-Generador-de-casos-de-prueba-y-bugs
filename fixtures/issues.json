@@ -1,0 +1,22 @@
+{
+  "DEMO-5001": {
+    "key": "DEMO-5001",
+    "type": "Historia de Usuario",
+    "summary": "Como gestor de avisos quiero filtrar el listado por estado para encontrarlos mas rapido",
+    "description": "Como gestor de avisos de obra, quiero poder filtrar el listado principal por estado, para no tener que recorrer manualmente todos los registros.\n\nCriterios de aceptacion:\n- El filtro de estado debe permitir elegir uno de los siguientes valores: Pendiente, Aprobado, Rechazado, Anulado.\n- Al aplicar el filtro, el listado debe mostrar unicamente los avisos cuyo estado coincide exactamente con el valor elegido.\n- Si no se selecciona ningun valor, el listado muestra todos los avisos sin filtrar.\n\nDocumentacion tecnica: ver DOC-FILTROS-AVISO.",
+    "status": "Done",
+    "linkedIssues": ["DEMO-5042"],
+    "docLinks": ["DOC-FILTROS-AVISO"],
+    "testCaseKeys": ["DEMO-5001-TC1", "DEMO-5001-TC2", "DEMO-5001-TC3"]
+  },
+  "DEMO-5042": {
+    "key": "DEMO-5042",
+    "type": "Bug",
+    "summary": "El filtro por estado 'Pendiente' no devuelve resultados",
+    "description": "Pasos para reproducir:\n1. Ingresar al listado de avisos de obra.\n2. Seleccionar el filtro de estado 'Pendiente'.\n3. Observar el resultado.\n\nResultado actual: el listado queda vacio, aunque existen avisos en estado Pendiente.\nResultado esperado: el listado muestra los avisos en estado Pendiente.\n\nAmbiente: QA. Reportado contra la Historia DEMO-5001.",
+    "status": "Abierto",
+    "linkedIssues": ["DEMO-5001"],
+    "docLinks": ["DOC-FILTROS-AVISO"],
+    "reportedAgainst": "DEMO-5001"
+  }
+}

@@ -18,6 +18,23 @@ correspondiente. Si el equipo ya tiene un MCP de Jira propio conectado (como
 `fedpat-jira`), los skills le indican al agente que lo use a el en vez de las
 tools de demo de este servidor — ver "Jira: no reinventar la rueda" abajo.
 
+## Presentacion: Artifacts y comentarios en Jira
+
+Ademas del informe en markdown en el chat, ambos skills saben publicar su
+resultado como un Artifact (pagina HTML) cuando esa tool esta disponible:
+`analizar-historia-bug` publica el informe como un "expediente" con badge de
+veredicto, y `revision-pre-qa` publica un checklist interactivo con barra de
+progreso, cuyos checks se guardan en el navegador (`localStorage`) para poder
+ir tildando pendientes a medida que se resuelven. Ejemplos publicados:
+
+- Informe de bug: https://claude.ai/code/artifact/8087001f-6896-4278-8da1-ed3798d92a11
+- Checklist pre-QA: https://claude.ai/code/artifact/1dbc5bba-0bb3-4cb7-a96b-2993138aa2de
+
+Si se pide cargar el informe (o un bug de dev) como comentario en el ticket,
+o crear un ticket nuevo, el agente arma el texto, lo muestra, y solo lo
+postea despues de una confirmacion explicita — nunca de forma automatica, por
+ser una accion visible para todo el equipo.
+
 ## Por que un MCP y no un script
 
 Un servidor MCP no "calcula" el veredicto: expone datos (issue, documentacion,

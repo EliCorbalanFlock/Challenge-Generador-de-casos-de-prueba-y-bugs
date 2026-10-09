@@ -132,6 +132,34 @@ documentacion, de la HU ni de casos de prueba.
    usuario lo pide explicitamente — no crear tickets sin confirmacion.>
    ```
 
+9. **Publicar un checklist interactivo como Artifact** (ademas del informe en
+   markdown), si tenes disponible la tool Artifact. Cargar primero el skill
+   `artifact-design`. Estructura de referencia (ver ejemplo publicado en esta
+   conversacion si lo tenes a mano):
+   - Encabezado con la clave de la HU, el titulo, y una barra de progreso +
+     contador ("X/Y resueltos") sobre los items accionables.
+   - Una tabla o lista, de solo lectura, con los criterios de aceptacion y su
+     estado (Cumple / No cumple / No verificable), para dar contexto.
+   - Un item **checkeable** por cada bug de dev detectado y por cada caso de
+     prueba a revisar — no por cada criterio que ya cumple. Cada item: titulo,
+     severidad (bloqueante/menor con color), evidencia en tipografia
+     monoespaciada, y un checkbox. Al tildarlo, tachar el texto y atenuarlo.
+   - El estado de los checkboxes se guarda con `localStorage` (try/catch en
+     cada lectura/escritura), scopeado por la clave de la HU, para que el
+     progreso persista aunque recargue la pagina — es un tracking personal,
+     no hace falta nada compartido entre usuarios.
+   - Favicon ✅. Titulo del artifact corto y especifico (ej. "Pre-QA
+     DEMO-5001").
+   - Si no tenes la tool Artifact disponible, no es un error: mostrar el
+     informe en markdown en el chat como siempre.
+
+10. **Si el usuario pide cargar un bug de dev (o el informe) como comentario
+    en el ticket, o crear un ticket de bug de dev**: armar el texto exacto y
+    mostrarselo al usuario primero. Ejecutar la accion (comentario o
+    creacion de ticket, con las tools del MCP de Jira real conectado) solo
+    despues de que el usuario confirme explicitamente — nunca asumir la
+    confirmacion. Son acciones visibles para todo el equipo.
+
 ## Reglas importantes
 
 - No marcar "Cumple" un criterio de frontend sin tener como verificarlo

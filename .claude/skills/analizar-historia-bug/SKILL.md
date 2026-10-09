@@ -120,6 +120,32 @@ casos de prueba, segui siempre este orden:
    prueba, pedir mas info>
    ```
 
+7. **Publicar el informe como Artifact** (ademas de mostrarlo en el chat), si
+   tenes disponible la tool Artifact. Cargar primero el skill
+   `artifact-design`. Estructura de referencia (ver ejemplo publicado en esta
+   conversacion si lo tenes a mano):
+   - Encabezado tipo "expediente": clave del bug y de la HU, titulo (el
+     summary del bug), y un badge de veredicto destacado arriba a la derecha,
+     con color segun el veredicto (rojo/bad para "Bug real", ambar/warn para
+     "Cambio funcional" o "Caso de prueba incorrecto", neutral para "Sin
+     evidencia suficiente").
+   - Una seccion por cada bloque del informe (Resumen, Documentacion,
+     Codigo analizado, Casos de prueba, Justificacion, Recomendacion), cada
+     una con un borde lateral de acento.
+   - El codigo citado (fragmentos del diff, nombres de archivo, mapas/enums)
+     en bloques o inline con tipografia monoespaciada.
+   - Favicon 🔍. Titulo del artifact corto y especifico (ej. "Caso
+     DEMO-5042"), nunca generico.
+   - Si no tenes la tool Artifact disponible, no es un error: mostrar el
+     informe en markdown en el chat como siempre.
+
+8. **Si el usuario pide cargar el informe (o un resumen) como comentario en
+   el ticket**: armar el texto exacto del comentario y mostrarselo al usuario
+   primero. Postearlo (con la tool de comentarios del MCP de Jira real
+   conectado, ej. `jira_add_comment`) solo despues de que el usuario confirme
+   explicitamente — nunca asumir la confirmacion ni postear de forma
+   preventiva. Es una accion visible para todo el equipo en el ticket.
+
 ## Reglas importantes
 
 - No asumir informacion que ninguna tool devolvio. Si falta documentacion,

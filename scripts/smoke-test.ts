@@ -29,11 +29,11 @@ async function call(name: string, args: Record<string, unknown>) {
   }
 }
 
-await call("jira_get_issue", { issueKey: "DEMO-5001" });
-await call("jira_get_issue", { issueKey: "DEMO-5042" });
-await call("jira_get_test_cases", { issueKey: "DEMO-5001" });
-await call("jira_get_documentation", { docRef: "DOC-FILTROS-AVISO" });
-await call("jira_get_documentation", { docRef: "NO-EXISTE" });
+await call("demo_jira_get_issue", { issueKey: "DEMO-5001" });
+await call("demo_jira_get_issue", { issueKey: "DEMO-5042" });
+await call("demo_jira_get_test_cases", { issueKey: "DEMO-5001" });
+await call("demo_jira_get_documentation", { docRef: "DOC-FILTROS-AVISO" });
+await call("demo_jira_get_documentation", { docRef: "NO-EXISTE" });
 await call("git_get_changed_files", {
   repoPath,
   fromRef: "main",
@@ -45,10 +45,10 @@ await call("git_get_diff", {
   toRef: "feature/DEMO-5001-filtro-estado",
 });
 
-await call("jira_get_issue", { issueKey: "DEMO-6010" });
-await call("jira_get_issue", { issueKey: "DEMO-6042" });
-await call("jira_get_test_cases", { issueKey: "DEMO-6010" });
-await call("jira_get_documentation", { docRef: "DOC-DENUNCIA-SRT" });
+await call("demo_jira_get_issue", { issueKey: "DEMO-6010" });
+await call("demo_jira_get_issue", { issueKey: "DEMO-6042" });
+await call("demo_jira_get_test_cases", { issueKey: "DEMO-6010" });
+await call("demo_jira_get_documentation", { docRef: "DOC-DENUNCIA-SRT" });
 await call("git_get_diff", {
   repoPath,
   fromRef: "main",

@@ -17,27 +17,50 @@ lo que el codigo efectivamente hace.
 
 ## Datos que vas a necesitar
 
-- La clave del Bug (ej: `DEMO-5042`) y/o de la Historia de Usuario relacionada.
+- La clave del Bug (ej: `DEMO-5042`) y/o de la Historia de Usuario relacionada
+  (si no las tenes, el paso 1 explica como conseguirlas igual).
 - La ruta local del repo (`repoPath`) donde esta el codigo de esa historia, y
   las referencias de git a comparar (`fromRef` = rama base, `toRef` = rama o
   commit de la historia).
 
-Si el usuario no te dio alguno de estos datos, pedilo antes de seguir.
+Si el usuario no te dio la ruta del repo o las referencias de git, pedilas
+antes de seguir — eso no tiene fallback.
+
+## Fuente de datos de Jira y documentacion: orden de prioridad
+
+Este MCP incluye tools `demo_jira_*` que leen fixtures locales, pensadas
+unicamente para probar el flujo sin credenciales. **No son la fuente
+preferida.** Para traer el bug, la Historia, la documentacion tecnica o los
+casos de prueba, segui siempre este orden:
+
+1. **MCP real del equipo, si hay uno conectado en la sesion** (por ejemplo
+   `fedpat-jira`, el MCP de doctec/Confluence del equipo, o cualquier otro con
+   tools de Jira/documentacion). Preferir siempre estas tools reales: son
+   datos de verdad, no fixtures de demo.
+2. **Tools `demo_jira_*` de este MCP**, solo si no hay ningun MCP real de Jira
+   conectado en la sesion.
+3. **Pedirselo directamente al usuario** si ninguna de las dos anteriores
+   tiene el dato (por ejemplo, la clave no existe en ningun MCP conectado, o
+   no hay MCP de Jira en absoluto): pedir que pegue el texto de la Historia de
+   Usuario y del bug reportado, y seguir el analisis con eso. No inventar
+   contenido de documentacion, de la HU ni del bug.
 
 ## Pasos
 
-1. **Traer el bug y la historia.** Llamar `jira_get_issue` con la clave del
-   bug. Del resultado, tomar `reportedAgainst` (o `linkedIssues`) para
-   identificar la Historia de Usuario, y llamar `jira_get_issue` de nuevo con
-   esa clave.
+1. **Traer el bug y la historia**, siguiendo el orden de prioridad de arriba.
+   Del resultado, tomar el campo que identifique la Historia relacionada
+   (`reportedAgainst` / `linkedIssues` en las tools `demo_jira_*`, o el campo
+   equivalente del MCP real) y traer tambien esa Historia.
 
-2. **Traer la documentacion tecnica.** Por cada valor en `docLinks` de la
-   Historia, llamar `jira_get_documentation`. Si la tool indica que no hay
-   documentacion local, pedirle al usuario que la pegue o adjunte antes de
-   continuar — no inventar contenido de documentacion.
+2. **Traer la documentacion tecnica.** Por cada link/referencia de
+   documentacion que aparezca en la Historia, traerla siguiendo el mismo
+   orden de prioridad (MCP real de documentacion → `demo_jira_get_documentation`
+   → pedirsela al usuario). No continuar con una comparacion documental sin
+   haber conseguido el contenido real de alguna de estas tres formas.
 
-3. **Traer los casos de prueba.** Llamar `jira_get_test_cases` con la clave de
-   la Historia.
+3. **Traer los casos de prueba**, con el mismo orden de prioridad (MCP real de
+   gestion de casos de prueba, si el equipo tiene uno → `demo_jira_get_test_cases`
+   → pedirselos al usuario).
 
 4. **Traer el codigo desarrollado.** Llamar `git_get_changed_files` y luego
    `git_get_diff` con el `repoPath`, `fromRef` y `toRef` indicados por el

@@ -6,8 +6,11 @@ prueba asociados — para determinar si el bug es real, un cambio funcional, o
 si el problema esta en un caso de prueba mal definido.
 
 Pensado para que cualquier equipo de desarrollo lo use desde Claude Code (u
-otro cliente MCP): el servidor expone herramientas de lectura (Jira, git), y
-el razonamiento/comparacion lo hace el agente, guiado por el skill incluido.
+otro cliente MCP): el servidor expone herramientas de lectura (demo de Jira,
+git), y el razonamiento/comparacion lo hace el agente, guiado por el skill
+incluido. Si el equipo ya tiene un MCP de Jira propio conectado (como
+`fedpat-jira`), el skill le indica al agente que lo use a el en vez de las
+tools de demo de este servidor — ver "Jira: no reinventar la rueda" abajo.
 
 ## Por que un MCP y no un script
 
@@ -19,24 +22,40 @@ rigida, y que cualquiera pueda pedirle al agente que profundice o repregunte.
 
 ## Estado actual (PoC para la jornada de IA)
 
-- **Jira**: los datos (`issues.json`, `testCases.json`, `docs.json` en
-  `fixtures/`) son fixtures locales, no la API real de Jira. La forma de los
-  datos ya esta pensada para mapear 1 a 1 contra la REST API de Jira
-  (`GET /rest/api/3/issue/{key}`, etc.) — ver "Proximos pasos".
+- **Jira**: las tools `demo_jira_*` de este servidor leen fixtures locales
+  (`issues.json`, `testCases.json`, `docs.json` en `fixtures/`), no la API
+  real de Jira — son solo para poder probar el flujo sin credenciales. No es
+  el camino recomendado para uso real: ver la seccion "Jira: no reinventar la
+  rueda" mas abajo.
 - **Codigo**: se analiza un repo git **local** (parametro `repoPath`), via
   `git diff` entre dos referencias (rama base vs rama/commit de la historia).
-  No depende de GitLab ni de ningun token.
-- Se incluye `sample-repo/`, un repo git de juguete que reproduce un bug real
-  a proposito (ver "Demo" abajo), para poder probar el flujo sin tocar ningun
-  repo ni dato de ningun cliente.
+  No depende de GitLab ni de ningun token. Esta es la parte que todo equipo
+  necesita y que normalmente no tiene ya resuelta via otro MCP.
+- Se incluye `sample-repo/`, un repo git de juguete con dos escenarios (ver
+  "Demo" abajo), para poder probar el flujo sin tocar ningun repo ni dato de
+  ningun cliente.
+
+## Jira: no reinventar la rueda
+
+La mayoria de los equipos que podrian usar este MCP ya tienen conectado un
+MCP de Jira propio (en FedPat, `fedpat-jira`; en otro equipo, el que sea).
+Por eso este servidor no implementa un cliente real de la API de Jira: el
+skill `analizar-historia-bug` le indica al agente que, si hay un MCP de Jira
+(o de documentacion tecnica, o de gestion de casos de prueba) conectado en la
+sesion, lo use a ese para traer los datos reales — y que recurra a las tools
+`demo_jira_*` de este servidor solo como fallback para probar el flujo sin
+esa conexion. Si ninguna de las dos fuentes tiene el dato, el skill le pide
+directamente al usuario que pegue el texto de la Historia de Usuario y del
+bug reportado. Ver el detalle en
+`.claude/skills/analizar-historia-bug/SKILL.md`.
 
 ## Tools expuestas
 
 | Tool | Que hace |
 |---|---|
-| `jira_get_issue` | Trae un issue (HU o Bug): resumen, descripcion, estado, issues enlazados, links a documentacion. |
-| `jira_get_test_cases` | Trae los casos de prueba asociados a una Historia de Usuario. |
-| `jira_get_documentation` | Trae el contenido de una documentacion tecnica enlazada a un issue. |
+| `demo_jira_get_issue` | [Demo] Trae un issue (HU o Bug) desde fixtures: resumen, descripcion, estado, issues enlazados, links a documentacion. Usar solo si no hay un MCP de Jira real conectado. |
+| `demo_jira_get_test_cases` | [Demo] Trae, desde fixtures, los casos de prueba asociados a una Historia de Usuario. |
+| `demo_jira_get_documentation` | [Demo] Trae, desde fixtures, el contenido de una documentacion tecnica enlazada a un issue. |
 | `git_get_changed_files` | Lista los archivos modificados entre dos referencias de un repo git local. |
 | `git_get_diff` | Trae el diff completo entre dos referencias de un repo git local. |
 | `git_get_file_content` | Trae el contenido completo de un archivo en una referencia puntual. |
@@ -139,10 +158,13 @@ npm run smoke
 
 ## Proximos pasos (fuera del alcance de hoy)
 
-- Reemplazar `src/data/jiraStore.ts` por llamadas reales a la REST API de
-  Jira (`JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN` por variables de
-  entorno), manteniendo la misma firma de funciones.
-- Tool opcional para traer documentacion desde Confluence por URL, para los
-  casos en que el link no se pueda resolver localmente.
+- Probar el skill con un MCP de Jira real conectado en paralelo (ver "Jira:
+  no reinventar la rueda") y ajustar las instrucciones si el agente no elige
+  bien entre la tool real y las `demo_jira_*`.
 - Tool opcional para traer el diff de un Merge Request via API de GitLab,
-  como alternativa a un repo local.
+  como alternativa a un repo local, para equipos que no quieran clonar el
+  repo localmente.
+- Si algun equipo no tiene ningun MCP de Jira propio, recien ahi evaluar
+  agregar un cliente real a `src/data/jiraStore.ts` (`JIRA_BASE_URL`,
+  `JIRA_EMAIL`, `JIRA_API_TOKEN` por variables de entorno) manteniendo la
+  misma firma de funciones — no es el camino por defecto.

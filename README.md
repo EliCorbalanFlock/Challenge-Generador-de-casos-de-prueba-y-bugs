@@ -1,24 +1,42 @@
 # hu-bug-analyzer (MCP)
 
-Servidor MCP que ayuda a analizar un bug de Jira contra su Historia de Usuario,
-la documentacion tecnica, el codigo efectivamente desarrollado y los casos de
-prueba asociados — para determinar si el bug es real, un cambio funcional, o
-si el problema esta en un caso de prueba mal definido.
+Servidor MCP que ayuda a comparar una Historia de Usuario, su documentacion
+tecnica, sus casos de prueba y el codigo efectivamente desarrollado. Incluye
+dos skills que usan las mismas tools con dos objetivos distintos:
+
+- **`analizar-historia-bug`**: dado un bug ya reportado, determina si es un
+  bug real, un cambio funcional, o si el problema esta en un caso de prueba
+  mal definido.
+- **`revision-pre-qa`**: antes de pasar una Historia a QA, audita el codigo
+  contra sus criterios de aceptacion y lista los incumplimientos como bugs de
+  dev a resolver — para encontrarlos antes de que los encuentre QA.
 
 Pensado para que cualquier equipo de desarrollo lo use desde Claude Code (u
 otro cliente MCP): el servidor expone herramientas de lectura (demo de Jira,
 git), y el razonamiento/comparacion lo hace el agente, guiado por el skill
-incluido. Si el equipo ya tiene un MCP de Jira propio conectado (como
-`fedpat-jira`), el skill le indica al agente que lo use a el en vez de las
+correspondiente. Si el equipo ya tiene un MCP de Jira propio conectado (como
+`fedpat-jira`), los skills le indican al agente que lo use a el en vez de las
 tools de demo de este servidor — ver "Jira: no reinventar la rueda" abajo.
 
 ## Por que un MCP y no un script
 
 Un servidor MCP no "calcula" el veredicto: expone datos (issue, documentacion,
 diff de codigo, casos de prueba) como tools. Quien arma el informe es el
-agente (Claude), siguiendo el flujo del skill `analizar-historia-bug`. Esto
-hace que el sistema razone caso por caso en vez de aplicar una heuristica
-rigida, y que cualquiera pueda pedirle al agente que profundice o repregunte.
+agente (Claude), siguiendo el flujo del skill correspondiente. Esto hace que
+el sistema razone caso por caso en vez de aplicar una heuristica rigida, y que
+cualquiera pueda pedirle al agente que profundice o repregunte.
+
+## Backend vs frontend
+
+El analisis de codigo (via las tools `git_*`) solo se usa para Historias de
+**backend**: la documentacion tecnica describe comportamiento verificable en
+codigo, y es razonablemente directo comparar uno contra otro. Para
+**frontend**, cumplir el criterio de aceptacion tambien depende de un diseño
+en Figma (u otra fuente visual), y esta version del MCP no tiene capacidad
+para comparar codigo renderizado contra un diseño — queda fuera de alcance a
+proposito. Para una Historia de frontend, los skills comparan HU vs
+documentacion vs casos de prueba, pero el informe deja explicito que la
+validacion visual contra el diseño requiere revision manual.
 
 ## Estado actual (PoC para la jornada de IA)
 
@@ -94,17 +112,17 @@ o agregarlo a `.mcp.json` del proyecto donde se quiera usar:
 }
 ```
 
-El skill `.claude/skills/analizar-historia-bug/SKILL.md` de este repo describe
-el flujo paso a paso. Para usarlo desde otro proyecto, copiar esa carpeta a
+Los skills `.claude/skills/analizar-historia-bug/SKILL.md` y
+`.claude/skills/revision-pre-qa/SKILL.md` de este repo describen cada flujo
+paso a paso. Para usarlos desde otro proyecto, copiar esas carpetas a
 `~/.claude/skills/` (nivel usuario) o al `.claude/skills/` del proyecto donde
 se quiera invocar.
 
 ## Demo
 
-`fixtures/` + `sample-repo/` incluyen dos escenarios, pensados para mostrar
-veredictos opuestos. Los identificadores son ficticios (`DEMO-####`): los
-casos estan inspirados en situaciones reales pero anonimizados a proposito,
-porque este repo es publico.
+`fixtures/` + `sample-repo/` incluyen tres escenarios. Los identificadores son
+ficticios (`DEMO-####`): los casos estan inspirados en situaciones reales
+pero anonimizados a proposito, porque este repo es publico.
 
 ### Escenario 1 — Bug real
 
@@ -149,6 +167,20 @@ Veredicto esperado: **Cambio funcional** (no es un bug) — el comportamiento
 reportado como incorrecto es el documentado, el pedido por la HU y el
 certificado por un test existente; lo que correspondería es pedir
 confirmación de negocio antes de tocar código. Ver `EJEMPLO-INFORME-2.md`.
+
+### Escenario 3 — Revision pre-QA (antes de que exista un bug)
+
+Mismo escenario que el 1 (`DEMO-5001`), pero con el skill `revision-pre-qa` y
+sin partir de ningun bug reportado: desarrollo revisa su propio trabajo antes
+de pasarlo a QA.
+
+> Hace la revision pre-QA de DEMO-5001. Es un repo de backend, el codigo esta
+> en sample-repo, rama feature/DEMO-5001-filtro-estado contra main.
+
+Resultado esperado: detecta que el criterio "el filtro debe permitir
+Pendiente/Aprobado/Rechazado/Anulado" no se cumple (falta "Pendiente" en el
+mapa), lo lista como bug de dev a resolver antes del pase a QA, y señala
+`DEMO-5001-TC3` como caso de prueba a revisar. Ver `EJEMPLO-INFORME-3.md`.
 
 Para probar las tools sin pasar por un cliente MCP completo:
 

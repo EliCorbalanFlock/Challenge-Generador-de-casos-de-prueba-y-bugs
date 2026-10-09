@@ -2,5 +2,9 @@
   "DOC-FILTROS-AVISO": {
     "title": "Filtros del listado de Avisos de Obra",
     "content": "El listado de avisos de obra soporta un filtro por estado. Los estados validos del dominio son exactamente cuatro: Pendiente, Aprobado, Rechazado y Anulado (ver enum EstadoAviso en el core aviso-de-obra). El filtro debe comparar el estado persistido contra el valor elegido por el usuario, ambos representados con el mismo enum. No existe en el dominio un estado 'Cancelado': ese valor no debe aparecer en ningun filtro ni caso de prueba."
+  },
+  "DOC-DENUNCIA-SRT": {
+    "title": "Regla de negocio - Denunciar SRT en el Encuadre",
+    "content": "En el Encuadre de una obra, el campo 'Denunciar SRT' indica si la obra debe ser informada a la SRT. La regla de negocio establece que 'Denunciar SRT' debe quedar en 'Si' cuando el seguimiento tiene cargada al menos una actividad denunciable (por ejemplo, Excavacion Menor), sin distinguir si esa actividad fue cargada en la edicion actual o en una anterior: el sistema evalua el conjunto completo de actividades vigentes del seguimiento en cada guardado, no solo las que se modificaron en esa edicion puntual. Mientras exista alguna actividad denunciable cargada, el usuario no puede destildar manualmente 'Denunciar SRT'; el campo solo puede quedar en 'No' cuando no hay ninguna actividad denunciable en el seguimiento. Mientras 'Denunciar SRT' este en 'Si', el Encuadre no puede pasar al estado NV sin antes informar a la SRT: el sistema debe bloquear el pase de estado con un mensaje explicativo. Cualquier pedido de que el valor manual del usuario prevalezca por sobre actividades denunciables preexistentes implica cambiar esta regla de negocio y requiere confirmacion explicita de negocio antes de implementarse."
   }
 }

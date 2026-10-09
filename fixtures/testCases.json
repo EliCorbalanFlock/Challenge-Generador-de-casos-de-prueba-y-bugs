@@ -33,5 +33,40 @@
       ],
       "expectedResult": "El listado muestra unicamente los avisos en estado Cancelado."
     }
+  ],
+  "DEMO-6010": [
+    {
+      "key": "DEMO-6010-TC1",
+      "title": "Sin actividades denunciables, Denunciar SRT permite quedar en No",
+      "preconditions": "El seguimiento no tiene ninguna actividad denunciable cargada.",
+      "steps": [
+        "Abrir el Encuadre en estado PV",
+        "Ir a Datos de la obra y dejar 'Denunciar SRT' en 'No'",
+        "Guardar"
+      ],
+      "expectedResult": "El valor persistido de 'Denunciar SRT' queda en 'No'."
+    },
+    {
+      "key": "DEMO-6010-TC2",
+      "title": "Agregar una actividad denunciable nueva fuerza Denunciar SRT a Si",
+      "preconditions": "El seguimiento no tiene actividades denunciables cargadas.",
+      "steps": [
+        "Abrir el Encuadre en estado PV",
+        "Agregar una actividad denunciable nueva (ej. Excavacion Menor)",
+        "Guardar"
+      ],
+      "expectedResult": "El valor persistido de 'Denunciar SRT' queda forzado en 'Si'."
+    },
+    {
+      "key": "DEMO-6010-TC3",
+      "title": "Destildar Denunciar SRT con una actividad denunciable ya cargada de antes",
+      "preconditions": "El seguimiento ya tiene cargada una actividad denunciable de una edicion anterior.",
+      "steps": [
+        "Abrir el Encuadre en estado PV",
+        "Ir a Datos de la obra y destildar manualmente 'Denunciar SRT', sin tocar ninguna actividad",
+        "Guardar"
+      ],
+      "expectedResult": "El sistema vuelve a forzar 'Denunciar SRT' a 'Si', ya que persiste una actividad denunciable cargada en el seguimiento (segun DOC-DENUNCIA-SRT). El Encuadre no puede pasar a NV sin informar a la SRT."
+    }
   ]
 }

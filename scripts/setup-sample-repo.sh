@@ -97,5 +97,87 @@ EOF
 git add src
 git commit -q -m "feature: implementar filtro de avisos por estado (DEMO-5001)"
 
+git checkout -q main
+mkdir -p "src/main/java/ar/com/fedpat/seguimientoobra"
+mkdir -p "src/test/java/ar/com/fedpat/seguimientoobra"
+git checkout -q -b feature/DEMO-6010-denuncia-srt
+
+cat > "src/main/java/ar/com/fedpat/seguimientoobra/ActividadObra.java" <<'EOF'
+package ar.com.fedpat.seguimientoobra;
+
+public class ActividadObra {
+
+    private Long id;
+    private boolean denunciable;
+
+    public ActividadObra(Long id, boolean denunciable) {
+        this.id = id;
+        this.denunciable = denunciable;
+    }
+
+    public boolean isDenunciable() {
+        return denunciable;
+    }
+}
+EOF
+
+cat > "src/main/java/ar/com/fedpat/seguimientoobra/SeguimientoObraService.java" <<'EOF'
+package ar.com.fedpat.seguimientoobra;
+
+import java.util.List;
+
+public class SeguimientoObraService {
+
+    // Evalua el conjunto completo de actividades vigentes del seguimiento en
+    // cada guardado (no solo las modificadas en esta edicion), segun
+    // DOC-DENUNCIA-SRT: si existe alguna actividad denunciable, se fuerza "Si"
+    // sin importar si fue cargada ahora o en una edicion anterior.
+    public boolean procesarRequiereDenunciarSrt(List<ActividadObra> actividadesVigentes) {
+        return actividadesVigentes.stream().anyMatch(ActividadObra::isDenunciable);
+    }
+}
+EOF
+
+cat > "src/test/java/ar/com/fedpat/seguimientoobra/SeguimientoObraServiceTest.java" <<'EOF'
+package ar.com.fedpat.seguimientoobra;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class SeguimientoObraServiceTest {
+
+    private final SeguimientoObraService service = new SeguimientoObraService();
+
+    @Test
+    void procesarRequiereDenunciarSrt_sinActividadesDenunciables_devuelveFalse() {
+        List<ActividadObra> actividadesVigentes = List.of(new ActividadObra(1L, false));
+
+        boolean resultado = service.procesarRequiereDenunciarSrt(actividadesVigentes);
+
+        assertFalse(resultado);
+    }
+
+    @Test
+    void procesarRequiereDenunciarSrt_actividadDenunciablePreexistente_fuerzaSi() {
+        // La actividad denunciable ya estaba cargada de una edicion anterior:
+        // el test certifica que igual se fuerza "Si", tal como documenta
+        // DOC-DENUNCIA-SRT. Este es el comportamiento que el bug DEMO-6042
+        // reporta como incorrecto.
+        List<ActividadObra> actividadesVigentes = List.of(new ActividadObra(1L, true));
+
+        boolean resultado = service.procesarRequiereDenunciarSrt(actividadesVigentes);
+
+        assertTrue(resultado);
+    }
+}
+EOF
+
+git add src
+git commit -q -m "feature: forzar Denunciar SRT segun actividades vigentes (DEMO-6010)"
+
 echo "sample-repo generado en $REPO"
 git log --oneline --all --graph

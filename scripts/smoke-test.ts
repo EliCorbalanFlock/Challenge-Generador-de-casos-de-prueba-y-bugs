@@ -45,4 +45,14 @@ await call("git_get_diff", {
   toRef: "feature/DEMO-5001-filtro-estado",
 });
 
+await call("jira_get_issue", { issueKey: "DEMO-6010" });
+await call("jira_get_issue", { issueKey: "DEMO-6042" });
+await call("jira_get_test_cases", { issueKey: "DEMO-6010" });
+await call("jira_get_documentation", { docRef: "DOC-DENUNCIA-SRT" });
+await call("git_get_diff", {
+  repoPath,
+  fromRef: "main",
+  toRef: "feature/DEMO-6010-denuncia-srt",
+});
+
 await client.close();

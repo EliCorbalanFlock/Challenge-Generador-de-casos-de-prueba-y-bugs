@@ -46,11 +46,20 @@ Si el usuario no te dio alguno de estos datos, pedilo antes de seguir.
 
 5. **Comparar y razonar**, en este orden:
    - ¿Que dice la documentacion que deberia pasar?
+   - ¿Que dicen los criterios de aceptacion de la Historia? ¿Coinciden con la
+     documentacion o hay alguna contradiccion entre ambas?
    - ¿Que hace el codigo realmente (segun el diff)?
+   - ¿Hay tests existentes (en el diff o en el repo) que certifiquen el
+     comportamiento actual para ese escenario puntual?
    - ¿Que describe el bug como comportamiento actual vs esperado?
    - ¿Los casos de prueba de la Historia validan exactamente lo que dice la
      documentacion, o prueban algo que no esta documentado / no existe en el
      dominio?
+   - Si el bug describe como "esperado" un comportamiento que contradice la
+     documentacion Y los criterios de aceptacion de la Historia, y el codigo
+     (mas algun test existente) es consistente con esa documentacion: el
+     comportamiento reportado como bug es, en realidad, el documentado. No
+     corregirlo como si fuera un bug.
 
 6. **Emitir el informe** con esta estructura exacta:
 
@@ -92,3 +101,16 @@ Si el usuario no te dio alguno de estos datos, pedilo antes de seguir.
 - Si un caso de prueba prueba un valor/estado que no aparece en la
   documentacion ni en el codigo (enum, lista de valores validos, etc.),
   marcarlo como **caso de prueba incorrecto**, no como bug.
+- Si existe un test automatizado que certifica explicitamente el
+  comportamiento que el bug reporta como incorrecto, tratarlo como evidencia
+  fuerte de que ese comportamiento es intencional: no asumir que el test esta
+  desactualizado solo porque alguien reporto un bug sobre ese escenario.
+- No confundir "se comporta distinto a como lo hace otro sistema (legado, de
+  referencia, de otro cliente, etc.)" con "es un bug". Si la documentacion y
+  la Historia vigentes describen el comportamiento actual tal como esta
+  implementado, la discrepancia con ese otro sistema es, como mucho, una
+  propuesta de **cambio de regla de negocio** que requiere confirmacion de
+  negocio antes de implementarse — no un bug a corregir de entrada. En ese
+  caso, la recomendacion del informe debe pedir esa confirmacion explicita
+  antes de tocar codigo, y citar el test existente que certifica el
+  comportamiento actual.

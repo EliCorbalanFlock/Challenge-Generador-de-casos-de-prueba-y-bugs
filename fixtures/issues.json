@@ -18,5 +18,25 @@
     "linkedIssues": ["DEMO-5001"],
     "docLinks": ["DOC-FILTROS-AVISO"],
     "reportedAgainst": "DEMO-5001"
+  },
+  "DEMO-6010": {
+    "key": "DEMO-6010",
+    "type": "Historia de Usuario",
+    "summary": "Forzar 'Denunciar SRT' cuando el seguimiento tiene actividades denunciables",
+    "description": "Como usuario, en el Encuadre de una obra, quiero que el sistema determine automaticamente si corresponde 'Denunciar SRT' en base a las actividades denunciables cargadas en el seguimiento, para evitar que una obra con actividades denunciables pendientes de informar llegue al estado NV sin haber sido denunciada a la SRT.\n\nCriterios de aceptacion:\n- Si el seguimiento tiene al menos una actividad denunciable cargada (se haya agregado en esta edicion o en una anterior), 'Denunciar SRT' debe forzarse a 'Si'.\n- El usuario no puede destildar manualmente 'Denunciar SRT' mientras exista alguna actividad denunciable cargada en el seguimiento.\n- 'Denunciar SRT' solo puede quedar en 'No' cuando no hay ninguna actividad denunciable cargada.\n- Mientras 'Denunciar SRT' = 'Si', no se puede pasar el Encuadre a estado NV sin antes informar a la SRT; el sistema debe bloquear el pase de estado con un mensaje explicativo.\n\nDocumentacion tecnica: ver DOC-DENUNCIA-SRT.",
+    "status": "Done",
+    "linkedIssues": ["DEMO-6042"],
+    "docLinks": ["DOC-DENUNCIA-SRT"],
+    "testCaseKeys": ["DEMO-6010-TC1", "DEMO-6010-TC2", "DEMO-6010-TC3"]
+  },
+  "DEMO-6042": {
+    "key": "DEMO-6042",
+    "type": "Bug",
+    "summary": "Al destildar manualmente 'Denunciar SRT' con una actividad denunciable ya cargada, el sistema lo vuelve a forzar a 'Si' y bloquea el pase a NV",
+    "description": "Pasos para reproducir:\n1. Abrir un Encuadre en estado PV de una obra que ya tiene cargada una actividad denunciable (ej. Excavacion Menor).\n2. Ir a Datos de la obra y destildar manualmente 'Denunciar SRT', sin tocar ninguna actividad.\n3. Guardar.\n4. Intentar pasar el Encuadre a NV.\n\nResultado actual: el sistema responde 'Actualizacion exitosa', pero el valor persistido de 'Denunciar SRT' vuelve a quedar en 'Si'. Al intentar pasar a NV se muestra el error 'No es posible informar una obra a la SRT en estado NV. Retirar el tilde en Denunciar SRT', y la obra queda bloqueada sin poder llegar a NV desde la UI.\n\nResultado esperado (segun quien reporta): al destildar manualmente 'Denunciar SRT' sin agregar actividades denunciables nuevas, el valor deberia respetarse y permitir el pase a NV.\n\nAmbiente: QA. Reportado contra la Historia DEMO-6010.",
+    "status": "Abierto",
+    "linkedIssues": ["DEMO-6010"],
+    "docLinks": ["DOC-DENUNCIA-SRT"],
+    "reportedAgainst": "DEMO-6010"
   }
 }

@@ -82,7 +82,12 @@ se quiera invocar.
 
 ## Demo
 
-El escenario de `fixtures/` + `sample-repo/` reproduce un caso real:
+`fixtures/` + `sample-repo/` incluyen dos escenarios, pensados para mostrar
+veredictos opuestos. Los identificadores son ficticios (`DEMO-####`): los
+casos estan inspirados en situaciones reales pero anonimizados a proposito,
+porque este repo es publico.
+
+### Escenario 1 — Bug real
 
 - **Historia `DEMO-5001`**: filtrar avisos de obra por estado (Pendiente,
   Aprobado, Rechazado, Anulado), documentada en `DOC-FILTROS-AVISO`.
@@ -94,14 +99,37 @@ El escenario de `fixtures/` + `sample-repo/` reproduce un caso real:
   existe ni en la documentacion ni en el codigo → caso de prueba mal
   definido, no un bug.
 
-Con el MCP conectado, pedirle al agente:
-
 > Analiza el bug DEMO-5042 contra su historia, la documentacion, el codigo en
 > `sample-repo` (main vs feature/DEMO-5001-filtro-estado) y sus casos de
 > prueba.
 
-El agente deberia encadenar las tools y devolver un informe con veredicto
-**Bug real**, mas la observacion sobre `DEMO-5001-TC3`.
+Veredicto esperado: **Bug real**, mas la observacion sobre `DEMO-5001-TC3`.
+Ver `EJEMPLO-INFORME.md`.
+
+### Escenario 2 — Bug que contradice la documentacion y la HU
+
+- **Historia `DEMO-6010`**: forzar "Denunciar SRT" a "Sí" cuando el
+  seguimiento tiene alguna actividad denunciable cargada (nueva o
+  preexistente), documentada en `DOC-DENUNCIA-SRT`.
+- **Bug `DEMO-6042`**: reporta como error que, al destildar manualmente
+  "Denunciar SRT" con una actividad denunciable ya cargada de antes, el
+  sistema lo vuelva a forzar a "Sí".
+- **Codigo** (`sample-repo`, rama `feature/DEMO-6010-denuncia-srt` vs
+  `main`): `SeguimientoObraService.procesarRequiereDenunciarSrt` hace
+  exactamente lo documentado, y un test existente
+  (`..._actividadDenunciablePreexistente_fuerzaSi`) certifica ese mismo
+  escenario como intencional.
+- **Caso de prueba `DEMO-6010-TC3`**: valida el comportamiento documentado —
+  contradice directamente lo que el bug espera.
+
+> Analiza el bug DEMO-6042 contra su historia, la documentacion, el codigo en
+> `sample-repo` (main vs feature/DEMO-6010-denuncia-srt) y sus casos de
+> prueba.
+
+Veredicto esperado: **Cambio funcional** (no es un bug) — el comportamiento
+reportado como incorrecto es el documentado, el pedido por la HU y el
+certificado por un test existente; lo que correspondería es pedir
+confirmación de negocio antes de tocar código. Ver `EJEMPLO-INFORME-2.md`.
 
 Para probar las tools sin pasar por un cliente MCP completo:
 
